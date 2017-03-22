@@ -1,17 +1,54 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import csv
+import itertools
+import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_score
 from sklearn.metrics import confusion_matrix
 from sklearn.model_selection import KFold
+
+
+def plot_confusion_matrix(cm, classes,
+                          normalize=False,
+                          title='Confusion matrix',
+                          cmap=plt.cm.Blues):
+    """
+    This function prints and plots the confusion matrix.
+    Normalization can be applied by setting `normalize=True`.
+    """
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=45)
+    plt.yticks(tick_marks, classes)
+
+    if normalize:
+        cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        print("Normalized confusion matrix")
+    else:
+        print('Confusion matrix, without normalization')
+
+    print(cm)
+
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, cm[i, j],
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+    plt.tight_layout()
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+
 
 k = 5
 
 with open('./iris.data', 'rt') as csvfile:
     reader = csv.reader(csvfile, delimiter=',')
     feature_names = np.array(['sl', 'sw', 'pl', 'pw', 'class'])
+    target_names = ['Iris-setosa', 'Iris-versicolor', 'Iris-virginica']
     X, Y = [], []
     for row in reader:
         X.append(row[:4])
@@ -22,16 +59,21 @@ with open('./iris.data', 'rt') as csvfile:
     clf_rs = RandomForestClassifier(min_samples_split=3, class_weight='balanced', random_state=37, max_features=None)
     clf_rs.fit(X, Y)
     predicted_rs = clf_rs.predict(X)
-    cfm_rs = confusion_matrix(Y, predicted_rs, labels=['Iris-setosa', 'Iris-versicolor', 'Iris-virginica'])
+    cfm_rs = confusion_matrix(Y, predicted_rs, labels=[
+        'Iris-setosa', 'Iris-versicolor', 'Iris-virginica'])
 
     # KFold
     # clf_k_fold = RandomForestClassifier(min_samples_split=3, class_weight='balanced', random_state=23)
-    kf = KFold(n_splits=k, random_state=True)
+    kf = KFold(n_splits=k, shuffle=True)
     kf.get_n_splits(X)
     cfm_KFold = np.zeros(shape=(3, 3,), dtype=np.int64)
     for train_index, test_index in kf.split(X):
         X_train, X_test = X[train_index], X[test_index]
         Y_train, Y_test = Y[train_index], Y[test_index]
+        print('train is')
+        print(train_index)
+        print('test is')
+        print(test_index)
         clf_KFold = RandomForestClassifier(min_samples_split=3,
                                            class_weight='balanced',
                                            random_state=23,
@@ -43,7 +85,15 @@ with open('./iris.data', 'rt') as csvfile:
                                         predicted_KFold,
                                         labels=['Iris-setosa', 'Iris-versicolor', 'Iris-virginica']
                                         )
-        print(cfm_ThisFold)
         cfm_KFold += cfm_ThisFold
-    print('Resubstitution is', cfm_rs)
-    print('KFold is', cfm_KFold)
+    print('Resubstitution is\n', cfm_rs)
+    plt.figure()
+    plot_confusion_matrix(cfm_rs,
+                          classes=target_names,
+                          title='resubstition')
+    print('KFold is\n', cfm_KFold)
+    plt.figure()
+    plot_confusion_matrix(cfm_KFold,
+                          classes=target_names,
+                          title='KFold (k=5)')
+    plt.show()
