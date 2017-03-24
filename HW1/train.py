@@ -43,7 +43,7 @@ def plot_confusion_matrix(cm, classes,
     plt.xlabel('Predicted label')
 
 
-k = 5
+k = 10
 
 with open('./iris.data', 'rt') as csvfile:
     reader = csv.reader(csvfile, delimiter=',')
@@ -56,28 +56,33 @@ with open('./iris.data', 'rt') as csvfile:
     X = np.array(X)
     Y = np.array(Y)
     # rs
-    clf_rs = RandomForestClassifier(min_samples_split=3, class_weight='balanced', random_state=37, max_features=None)
+    clf_rs = RandomForestClassifier(n_estimators=19,
+                                    criterion='gini',
+                                    min_samples_split=4,
+                                    random_state=37,
+                                    max_features=None,
+                                    warm_start=True,
+                                    max_depth=None,
+                                    )
     clf_rs.fit(X, Y)
     predicted_rs = clf_rs.predict(X)
     cfm_rs = confusion_matrix(Y, predicted_rs, labels=[
         'Iris-setosa', 'Iris-versicolor', 'Iris-virginica'])
 
     # KFold
-    # clf_k_fold = RandomForestClassifier(min_samples_split=3, class_weight='balanced', random_state=23)
     kf = KFold(n_splits=k, shuffle=True)
     kf.get_n_splits(X)
     cfm_KFold = np.zeros(shape=(3, 3,), dtype=np.int64)
     for train_index, test_index in kf.split(X):
         X_train, X_test = X[train_index], X[test_index]
         Y_train, Y_test = Y[train_index], Y[test_index]
-        print('train is')
-        print(train_index)
-        print('test is')
-        print(test_index)
-        clf_KFold = RandomForestClassifier(min_samples_split=3,
-                                           class_weight='balanced',
-                                           random_state=23,
-                                           max_features=None
+        clf_KFold = RandomForestClassifier(n_estimators=19,
+                                           criterion='gini',
+                                           min_samples_split=4,
+                                           random_state=37,
+                                           max_features=None,
+                                           warm_start=True,
+                                           max_depth=None,
                                            )
         clf_KFold.fit(X_train, Y_train)
         predicted_KFold = clf_KFold.predict(X_test)
@@ -86,14 +91,14 @@ with open('./iris.data', 'rt') as csvfile:
                                         labels=['Iris-setosa', 'Iris-versicolor', 'Iris-virginica']
                                         )
         cfm_KFold += cfm_ThisFold
-    print('Resubstitution is\n', cfm_rs)
+    print('Resubstitution is\n')
     plt.figure()
     plot_confusion_matrix(cfm_rs,
                           classes=target_names,
                           title='resubstition')
-    print('KFold is\n', cfm_KFold)
+    print('KFold is\n')
     plt.figure()
     plot_confusion_matrix(cfm_KFold,
                           classes=target_names,
-                          title='KFold (k=5)')
+                          title='KFold (k=%d)' % k)
     plt.show()
