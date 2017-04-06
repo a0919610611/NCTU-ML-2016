@@ -55,6 +55,7 @@ with open('./iris.data', 'rt') as csvfile:
         Y.append(row[4])
     X = np.array(X)
     Y = np.array(Y)
+    print(Y)
     # rs
     clf_rs = RandomForestClassifier(n_estimators=19,
                                     criterion='gini',
