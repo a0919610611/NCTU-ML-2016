@@ -21,15 +21,15 @@ if __name__ == '__main__':
     start_time = time.time()
     predicted_rs = KNN_rs.predict(X)
     used_time = time.time() - start_time
-    print("KD Tree using euclidean distance with resubstitution method querying time is %s seconds" % used_time)
+    print("Linear Search using euclidean distance with resubstitution method querying time is %s seconds" % used_time)
     cfm_rs = confusion_matrix(Y, predicted_rs, labels=range(1, 11))
-    print("KD Tree using euclidean distance with resubstitution method confusion matrix is ")
+    print("Linear Search using euclidean distance with resubstitution method confusion matrix is ")
     print(cfm_rs)
     ac_rate = accuracy_score(Y, predicted_rs)
-    print("KD Tree using euclidean distance with resubstitution method accurary score is %s" % ac_rate)
+    print("Linear Search using euclidean distance with resubstitution method accurary score is %s" % ac_rate)
     plt.figure()
     plot_confusion_matrix(cfm_rs, classes=range(1, 11),
-                          title='KD Tree using euclidean distance with resubstitution method')
+                          title='Linear Search using euclidean distance with resubstitution method')
 
     k = 20
     kf = KFold(n_splits=k, shuffle=True)
@@ -40,8 +40,14 @@ if __name__ == '__main__':
         X_train, X_test = X[train_index], X[test_index]
         Y_train, Y_test = Y[train_index], Y[test_index]
         clf_KFold = KNeighborsClassifier(n_neighbors=5, algorithm='brute', metric='euclidean')
+        start_time = time.time()
         clf_KFold.fit(X_train, Y_train)
+        used_time = time.time() - start_time
+        print("%d fold traing time is %s" % (i, used_time))
+        start_time = time.time()
         predicted_thisFold = clf_KFold.predict(X_test)
+        used_time = time.time() - start_time
+        print("%d fold query time is %s" % (i, used_time))
         cfm_thisFold = confusion_matrix(Y_test, predicted_thisFold, labels=range(1, 11))
         print("%d fold confusion matrix is" % i)
         print(cfm_thisFold)
@@ -50,5 +56,5 @@ if __name__ == '__main__':
         i += 1
     plt.figure()
     plot_confusion_matrix(cfm_kfold, classes=range(1, 11),
-                          title='KD Tree using euclidean distance with KFold method')
+                          title='Linear Search using euclidean distance with KFold method')
     plt.show()
