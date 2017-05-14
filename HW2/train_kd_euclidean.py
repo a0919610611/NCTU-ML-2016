@@ -13,7 +13,7 @@ if __name__ == '__main__':
     data = get_data()
     X = data['feature_matrix']
     Y = data['target_vector']
-    KNN_rs = KNeighborsClassifier(n_neighbors=5, algorithm='kd_tree', metric='euclidean')
+    KNN_rs = KNeighborsClassifier(n_neighbors=10, algorithm='kd_tree', metric='euclidean')
     start_time = time.time()
     KNN_rs.fit(X, Y)
     used_time = time.time() - start_time
@@ -39,7 +39,7 @@ if __name__ == '__main__':
     for train_index, test_index in kf.split(X):
         X_train, X_test = X[train_index], X[test_index]
         Y_train, Y_test = Y[train_index], Y[test_index]
-        clf_KFold = KNeighborsClassifier(n_neighbors=5, algorithm='kd_tree', metric='euclidean')
+        clf_KFold = KNeighborsClassifier(n_neighbors=10, algorithm='kd_tree', metric='euclidean')
         start_time = time.time()
         clf_KFold.fit(X_train, Y_train)
         used_time = time.time() - start_time
