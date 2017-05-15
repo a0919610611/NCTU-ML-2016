@@ -81,5 +81,13 @@ def get_data(filename):
     return data
 
 
+def get_test_matrix(filename):
+    df = pd.read_csv(filename, header=None)
+    data = dict()
+    data['label'] = np.array(df.iloc[:, :1])
+    data['feature_matrix'] = np.matrix(df.iloc[:, 1:])
+    return data
+
+
 if __name__ == "__main__":
     clean_data(sys.argv[1])
